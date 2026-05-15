@@ -25,6 +25,8 @@ I was fortune to be able to collab with a current Engineering teacher to build a
 * Practice my app development
 * Learn the basics of WPF
 * Practice project management principles on myself to execute a solution
+* Learn System.IO and other file management librarie
+* Create a basic way to store data (JSON or SQL) so data is persistent
 
 ## Tech Stack
 * C# 
