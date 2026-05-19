@@ -1,14 +1,52 @@
-﻿//Testing logic using Console App
+﻿using System.Diagnostics;
+using System.IO;
+//Testing logic using Console App
 Console.WriteLine("Press anything to start.");
 Console.ReadKey();
 
 GameScanner scanner = new GameScanner();
 
-Console.WriteLine($"Current Directory: {scanner.currentDirectory}");
+//Console.WriteLine($"Current Directory: {scanner.currentDirectory}");
 Console.WriteLine($"The game folder Directory: {scanner.GamesDirectory}");
 
 scanner.DisplayFiles();
 
+Console.WriteLine("Launching game in Game1 folder!");
+string Game1Path = Path.Combine(scanner.GamesDirectory, "Game.txt");
+
+if (!File.Exists(Game1Path))
+{
+    Console.WriteLine($"File Not Found at{Game1Path}");
+    return;
+}
+else
+{
+
+    ProcessStartInfo startInfo = new ProcessStartInfo
+    {
+        FileName = @$"{Game1Path}",
+        UseShellExecute = true
+    };
+
+
+
+    //wrap this in a try catch block for FileNotFound or Win32Execption
+    Process process = Process.Start(startInfo);
+    //check for null before waiting for it
+    process.WaitForExit();
+    Console.WriteLine("Successfully waited for you to come back!");
+}
+
+
+
+
+
+//Baby steps
+//Console.WriteLine($"Which one would you like to play?");
+//Console.WriteLine($"The game folder Directory: {scanner.GamesDirectory}");
+
+Console.WriteLine("Program ended.");
+Console.ReadKey();
 
 
 
@@ -25,41 +63,37 @@ class GameScanner
 {
     IEnumerable<string> GameFiles { get; set; }
 
-    public string? currentDirectory { get; set;}
-    public string? GamesDirectory { get; set; }
+    public string?  documentsPath { get; set;}
+    public string? GamesDirectory { get;private set; }
     public GameScanner()
     {
-        try
+   
+        documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        GamesDirectory = Path.Combine(documentsPath, "StudentGames");
+
+       
+        if (!Directory.Exists(GamesDirectory))
         {
+            Console.WriteLine($"Folder missing. Creating directory at: {GamesDirectory}");
 
-             currentDirectory = Directory.GetCurrentDirectory();
+        
+            Directory.CreateDirectory(GamesDirectory);
 
-             GamesDirectory = Path.Combine(currentDirectory, "Games");
-
-
-            bool FolderExists = Directory.Exists(GamesDirectory);
-            Console.WriteLine($"Folder exists: {FolderExists}");
-            this.GameFiles = Directory.EnumerateDirectories("Games");
+            Console.WriteLine("Folder created! Please add student game folders here.");
         }
-        catch (System.IO.DirectoryNotFoundException)
+        else
         {
-            
-
-            bool FolderExists = Directory.Exists(GamesDirectory);
-            Console.WriteLine($"Folder exists: {FolderExists}");
-            Console.WriteLine("Creating Folder! Add games to the directory above.");
-            CreateFolder("Games");
-            this.GameFiles = Directory.EnumerateDirectories("Games");
+            Console.WriteLine($"Target folder found: {GamesDirectory}");
         }
 
-
-
+     
+        this.GameFiles = Directory.EnumerateDirectories(GamesDirectory);
     }
 
     public bool FolderCheck()//fix this - remove flow from try statement above and use selection statements here.
     {
         
-        bool FolderExists = Directory.Exists(currentDirectory);
+        bool FolderExists = Directory.Exists(GamesDirectory);
         Console.WriteLine($"Folder exists: {FolderExists}");
 
         return FolderExists;
