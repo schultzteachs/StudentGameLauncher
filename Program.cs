@@ -6,7 +6,7 @@ Console.ReadKey();
 
 GameScanner scanner = new GameScanner();
 
-//Console.WriteLine($"Current Directory: {scanner.currentDirectory}");
+             
 Console.WriteLine($"The game folder Directory: {scanner.GamesDirectory}");
 
 scanner.DisplayFiles();
@@ -56,7 +56,7 @@ Console.ReadKey();
 //DONE - look for a designated folder and create one if not one - might need to be in the constructor
 //DONE - create a folder for games to be placed
 //DONE - method for displaying the contents of a folder
-//Fix FolderCheck method and remove flow control from try block
+//DONE - Fix FolderCheck method and remove flow control from try block
 //method to grab the exe for a unity game inside its own folder
 
 class GameScanner
@@ -65,18 +65,29 @@ class GameScanner
 
     public string?  documentsPath { get; set;}
     public string? GamesDirectory { get;private set; }
+
+
+
     public GameScanner()
     {
-   
         documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         GamesDirectory = Path.Combine(documentsPath, "StudentGames");
 
-       
+        InitializeFolder();
+
+
+
+    }
+
+
+    public void InitializeFolder()
+    {
+
         if (!Directory.Exists(GamesDirectory))
         {
             Console.WriteLine($"Folder missing. Creating directory at: {GamesDirectory}");
 
-        
+
             Directory.CreateDirectory(GamesDirectory);
 
             Console.WriteLine("Folder created! Please add student game folders here.");
@@ -86,19 +97,12 @@ class GameScanner
             Console.WriteLine($"Target folder found: {GamesDirectory}");
         }
 
-     
+
         this.GameFiles = Directory.EnumerateDirectories(GamesDirectory);
     }
 
-    public bool FolderCheck()//fix this - remove flow from try statement above and use selection statements here.
-    {
-        
-        bool FolderExists = Directory.Exists(GamesDirectory);
-        Console.WriteLine($"Folder exists: {FolderExists}");
 
-        return FolderExists;
-    }
-    
+
 
     public void CreateFolder(string FolderName)
     {
@@ -109,9 +113,7 @@ class GameScanner
     {
         foreach (var dir in GameFiles)
         {
-
             Console.WriteLine(dir);
-
         }
     }
     
