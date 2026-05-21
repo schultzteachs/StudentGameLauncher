@@ -1,49 +1,18 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+
+
+
 //Testing logic using Console App
 Console.WriteLine("Press anything to start.");
 Console.ReadKey();
 
-GameScanner scanner = new GameScanner();
+UI UI = new UI();
 
-             
-Console.WriteLine($"The game folder Directory: {scanner.GamesDirectory}");
+//Console.WriteLine($"{UI.GrabUnityEXE()}");
+UI.Launch();
 
-scanner.DisplayFiles();
-
-Console.WriteLine("Launching game in Game1 folder!");
-string Game1Path = Path.Combine(scanner.GamesDirectory, "Game.txt");
-
-if (!File.Exists(Game1Path))
-{
-    Console.WriteLine($"File Not Found at{Game1Path}");
-    return;
-}
-else
-{
-
-    ProcessStartInfo startInfo = new ProcessStartInfo
-    {
-        FileName = @$"{Game1Path}",
-        UseShellExecute = true
-    };
-
-
-
-    //wrap this in a try catch block for FileNotFound or Win32Execption
-    Process process = Process.Start(startInfo);
-    //check for null before waiting for it
-    process.WaitForExit();
-    Console.WriteLine("Successfully waited for you to come back!");
-}
-
-
-
-
-
-//Baby steps
-//Console.WriteLine($"Which one would you like to play?");
-//Console.WriteLine($"The game folder Directory: {scanner.GamesDirectory}");
 
 Console.WriteLine("Program ended.");
 Console.ReadKey();
@@ -57,14 +26,90 @@ Console.ReadKey();
 //DONE - create a folder for games to be placed
 //DONE - method for displaying the contents of a folder
 //DONE - Fix FolderCheck method and remove flow control from try block
-//method to grab the exe for a unity game inside its own folder
+//DONE - method to grab the exe for a unity game inside its own folder
 
-class GameScanner
+
+public class UI
 {
-    IEnumerable<string> GameFiles { get; set; }
+   public GameScanner scanner = new GameScanner();
+    //the UI should "own" its own instance of the GameScanner class.
 
-    public string?  documentsPath { get; set;}
-    public string? GamesDirectory { get;private set; }
+    public void DisplayFiles()
+    {
+        Console.WriteLine("------Current Game Options------");
+        if (!scanner.GameFolders.Any())
+        {
+            Console.WriteLine($"No items were found inside {scanner.GamesDirectory}. Ensure you have added FOLDERS to this exact path.");
+        }
+
+        foreach (var dir in scanner.GameFolders)
+        {
+            string file = Path.GetFileName(dir);
+            Console.WriteLine(file);
+        }
+    }
+    public string GrabUnityEXE()
+    {
+        Console.WriteLine("Write the name of the game you want to play");
+        DisplayFiles(); //Displays directories of game folders
+        string response = Console.ReadLine();
+
+        string? exePath = scanner.FindExecutableInFolder(response);
+
+        if (exePath != null)
+        {
+            return exePath;
+        }
+        else 
+        { 
+            Console.WriteLine("No .exe found.");
+            return " ";
+        }
+    }
+    public void Launch()
+    {
+        Console.WriteLine("Which game would you like to start?");
+        DisplayFiles();
+        string response = Console.ReadLine();
+
+        string Game1Path = scanner.FindExecutableInFolder(response);
+
+        if (!File.Exists(Game1Path))
+        {
+            Console.WriteLine($"File Not Found at{Game1Path}");
+            return;
+        }
+        else
+        {
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = @$"{Game1Path}",
+                UseShellExecute = true
+            };
+
+
+
+            //wrap this in a try catch block for FileNotFound or Win32Execption
+            Process process = Process.Start(startInfo);
+            //check for null before waiting for it
+            process.WaitForExit();
+
+        }
+    }
+
+    public void FilePathBad()
+    {
+        Console.WriteLine($"Warning. File path bad or file not found");
+    }
+}
+
+public class GameScanner
+{
+    public IEnumerable<string> GameFolders { get; set; } //list of game directories
+
+    public string?  documentsPath { get; set;} //gets us to MyDocuments
+    public string? GamesDirectory { get;private set; } //Path to StudentGamesFolder
 
 
 
@@ -80,7 +125,7 @@ class GameScanner
     }
 
 
-    public void InitializeFolder()
+    public void InitializeFolder() //TO-DO: Refactor UI here
     {
 
         if (!Directory.Exists(GamesDirectory))
@@ -98,24 +143,24 @@ class GameScanner
         }
 
 
-        this.GameFiles = Directory.EnumerateDirectories(GamesDirectory);
+        this.GameFolders = Directory.EnumerateDirectories(GamesDirectory);
     }
 
 
 
+    public string? FindExecutableInFolder(string folderName)
+    {
+        string targetFolder = Path.Combine(GamesDirectory, folderName);
 
-    public void CreateFolder(string FolderName)
-    {
-        Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Games"));
-    }
-    
-    public void DisplayFiles()
-    {
-        foreach (var dir in GameFiles)
+        if (!Directory.Exists(targetFolder))
         {
-            Console.WriteLine(dir);
+            return null;
         }
+        return Directory.GetFiles(targetFolder, "*.exe").FirstOrDefault();
     }
+  
+   
+
     
 }
 
