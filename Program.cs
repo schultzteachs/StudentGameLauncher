@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
+
 
 
 
@@ -27,6 +27,7 @@ Console.ReadKey();
 //DONE - method for displaying the contents of a folder
 //DONE - Fix FolderCheck method and remove flow control from try block
 //DONE - method to grab the exe for a unity game inside its own folder
+//Add robustness to filescanner in case there is a folder inside of a folder
 
 
 public class UI
