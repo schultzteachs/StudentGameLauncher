@@ -29,7 +29,8 @@ Console.ReadKey();
 //DONE - method for displaying the contents of a folder
 //DONE - Fix FolderCheck method and remove flow control from try block
 //DONE - method to grab the exe for a unity game inside its own folder
-//Add robustness to filescanner to extract Zip Files
+//DONE - Add robustness to filescanner to extract Zip Files
+//Incorporate Event Driven UI AFTER decoupling UI from logic classes
 
 public class UI
 {
@@ -140,11 +141,14 @@ public class GameScanner
 
             foreach (string file in zipFiles)
             {
-                try { ZipFile.ExtractToDirectory(file, GamesDirectory); }
+                try { ZipFile.ExtractToDirectory(file, GamesDirectory);
+
+                    File.Delete(file);
+                }
                 catch (Exception)
                 {
                     Console.WriteLine("Skipping over duplicates...");
-                    File.Delete(file);
+                    
                     continue;
                 }
 
@@ -218,12 +222,23 @@ class Game
 
 class Controller
 {
-    //this class owns the Scanner/Game/Database classes
+    private readonly GameScanner _scannerTool;
+    private readonly DataBase _databaseTool;
+    //this class owns the Scanner/Game/Database classes.... wait no. Use Dependency Injection instead.
     //takes in UI commands and acts on them
     //tells UI what to print
     //saves new games paths to the database
 
+
+    public Controller(GameScanner scannerTool, DataBase databaseTool)
+    {
+        _scannerTool = scannerTool;
+        _databaseTool = databaseTool;
+    }
+
 }
+
+
 
 class DataBase
 {
