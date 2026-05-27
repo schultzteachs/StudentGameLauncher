@@ -196,9 +196,9 @@ public class GameScanner
 /*Contain meta-data for year created, author name(s), Title, ExecutablePath, ThumbnailPath, SchoolYear, 
 *Constructor that takes/asks for meta-data and sets a default if data is not given
 *Game needs to be able to broadcast updates to its metadata to the UI
- */
+*/
 
-/*class Game
+class Game
 {
     List<string> AuthorNames {  get; set; }
     string Tagline {  get; set; }
@@ -206,8 +206,28 @@ public class GameScanner
 
     string ThumbnailPath { get; set; }
 
-    int SchoolYear { get; set; }
+    int SchoolYearCreated { get; set; }
 
     //Broadcast changes for metadata to UI
+
+    public void Launch()
+    {
+        //launches itself
+    }
 }
-*/
+
+class Controller
+{
+    //this class owns the Scanner/Game/Database classes
+    //takes in UI commands and acts on them
+    //tells UI what to print
+    //saves new games paths to the database
+
+}
+
+class DataBase
+{
+    //Owns: JSON for config settings
+    //writes metadata of games to JSON
+    //Checks JOSN file when program starts and returns to the Controller class
+}
