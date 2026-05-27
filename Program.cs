@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;    
 
 
 
@@ -7,13 +8,14 @@ using System.IO;
 //Testing logic using Console App
 Console.WriteLine("Press anything to start.");
 Console.ReadKey();
-
 UI UI = new UI();
+while (Console.ReadKey(true).Key != ConsoleKey.Escape)
+    
+{
+    //Console.WriteLine($"{UI.GrabUnityEXE()}");
+    UI.Launch();
 
-//Console.WriteLine($"{UI.GrabUnityEXE()}");
-UI.Launch();
-
-
+}
 Console.WriteLine("Program ended.");
 Console.ReadKey();
 
@@ -27,8 +29,7 @@ Console.ReadKey();
 //DONE - method for displaying the contents of a folder
 //DONE - Fix FolderCheck method and remove flow control from try block
 //DONE - method to grab the exe for a unity game inside its own folder
-//Add robustness to filescanner in case there is a folder inside of a folder
-
+//Add robustness to filescanner to extract Zip Files
 
 public class UI
 {
@@ -82,7 +83,7 @@ public class UI
         }
         else
         {
-
+            Console.Write($"Launching {response}...");
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = @$"{Game1Path}",
@@ -95,7 +96,7 @@ public class UI
             Process process = Process.Start(startInfo);
             //check for null before waiting for it
             process.WaitForExit();
-
+            Console.Clear();
         }
     }
 
@@ -111,7 +112,7 @@ public class GameScanner
 
     public string?  documentsPath { get; set;} //gets us to MyDocuments
     public string? GamesDirectory { get;private set; } //Path to StudentGamesFolder
-
+    public string[]? zipFiles { get; set; } // place for zipfiles before extraction
 
 
     public GameScanner()
@@ -121,11 +122,35 @@ public class GameScanner
 
         InitializeFolder();
 
-
-
+        DealWithZipFiles();
     }
 
+    public void DealWithZipFiles()
+    {
+        zipFiles = Directory.GetFiles(GamesDirectory, "*.zip");
+        if (zipFiles.Length > 0)
+        {
+            Console.WriteLine("The following zipfiles were found:");
+            foreach (string file in zipFiles)
+            {
 
+                Console.WriteLine($"{file}");
+            }
+            Console.WriteLine("The .zip files will be extracted and added to your list of games.");
+
+            foreach (string file in zipFiles)
+            {
+                try { ZipFile.ExtractToDirectory(file, GamesDirectory); }
+                catch (Exception)
+                {
+                    Console.WriteLine("Skipping over duplicates...");
+                    File.Delete(file);
+                    continue;
+                }
+
+            }
+        }
+    }
     public void InitializeFolder() //TO-DO: Refactor UI here
     {
 
@@ -136,7 +161,8 @@ public class GameScanner
 
             Directory.CreateDirectory(GamesDirectory);
 
-            Console.WriteLine("Folder created! Please add student game folders here.");
+            Console.WriteLine("Folder created! Exit now and add games to the file name StudentGames under MyDocuments. Please add student game folders here.");
+
         }
         else
         {
