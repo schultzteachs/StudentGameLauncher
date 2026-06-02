@@ -36,9 +36,10 @@ I was fortune to be able to collab with a current Engineering teacher to build a
 * Github for repo
 
 ## Architecture & Project Management
+<img width="492" height="375" alt="image" src="https://github.com/user-attachments/assets/24bb9ce3-127c-458e-af0a-94171ca4b892" />
 
 ### Architectural Design
-To ensure the app is maintainable and scalable for other teachers, I am following the **MVVM (Model-View-ViewModel)** pattern. This separates the game-searching and process-launching logic from the WPF user interface, allowing for easier testing and future updates (such as moving to a cloud-based database).
+To ensure the app is maintainable and scalable for other teachers, I am following the **MVC (Model-View-Controller)** pattern. This separates the game-searching and process-launching logic from the WPF user interface, allowing for easier testing and future updates (such as moving to a cloud-based database).
 
 ### Project Management Approach
 I am acting as the sole Project Manager and Developer for this solution, utilizing the following principles:
