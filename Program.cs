@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;    
 
@@ -8,14 +9,15 @@ using System.IO.Compression;
 //Testing logic using Console App
 Console.WriteLine("Press anything to start.");
 Console.ReadKey();
-UI UI = new UI();
-while (Console.ReadKey(true).Key != ConsoleKey.Escape)
-    
-{
-    //Console.WriteLine($"{UI.GrabUnityEXE()}");
-    UI.Launch();
 
-}
+DataBase database = new DataBase();
+GameScanner gamescanner = new GameScanner();
+Controller controller = new Controller(gamescanner, database);
+
+
+
+
+
 Console.WriteLine("Program ended.");
 Console.ReadKey();
 
@@ -34,8 +36,21 @@ Console.ReadKey();
 
 public class UI
 {
-   public GameScanner scanner = new GameScanner();
-    //the UI should "own" its own instance of the GameScanner class.
+
+    public void DisplayOptions(IEnumerable<string> options)
+    {
+        foreach (string option in options)
+        {
+            Console.WriteLine(option);
+        }
+
+    }
+
+    public string GetInput()
+    {
+        string response = Console.ReadLine();
+        return response;
+    }
 
     public void DisplayFiles()
     {
@@ -73,32 +88,11 @@ public class UI
     {
         Console.WriteLine("Which game would you like to start?");
         DisplayFiles();
+        //add launch code for games found
+        
         string response = Console.ReadLine();
 
-        string Game1Path = scanner.FindExecutableInFolder(response);
-
-        if (!File.Exists(Game1Path))
-        {
-            Console.WriteLine($"File Not Found at{Game1Path}");
-            return;
-        }
-        else
-        {
-            Console.Write($"Launching {response}...");
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = @$"{Game1Path}",
-                UseShellExecute = true
-            };
-
-
-
-            //wrap this in a try catch block for FileNotFound or Win32Execption
-            Process process = Process.Start(startInfo);
-            //check for null before waiting for it
-            process.WaitForExit();
-            Console.Clear();
-        }
+       
     }
 
     public void FilePathBad()
@@ -206,24 +200,80 @@ class Game
 {
     List<string> AuthorNames {  get; set; }
     string Tagline {  get; set; }
-    string ExecutablePath { get; set; }
+    public string ExecutablePath { get; set; }
 
+    public string Title { get; set; }
     string ThumbnailPath { get; set; }
 
     int SchoolYearCreated { get; set; }
 
     //Broadcast changes for metadata to UI
 
+    public Game(string ExePath, string title)
+    {
+        ExecutablePath = ExePath;
+        Title = title;
+    }
+
     public void Launch()
     {
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            FileName = @$"{ExecutablePath}",
+            UseShellExecute = true
+        };
+        try
+        {
+            //wrap this in a try catch block for FileNotFound or Win32Execption
+            Process process = Process.Start(startInfo);
+            //check for null before waiting for it
+            process.WaitForExit();
+            Console.Clear();
+        }
+        catch (FileNotFoundException) { }
+        catch (Win32Exception) { }
+        catch (IOException) { }
         //launches itself
     }
+
+
+
+
+    /* string Game1Path = scanner.FindExecutableInFolder(response);
+
+        if (!File.Exists(Game1Path))
+        {
+            Console.WriteLine($"File Not Found at{Game1Path}");
+            return;
+        }
+        else
+        {
+            Console.Write($"Launching {response}...");
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = @$"{Game1Path}",
+                UseShellExecute = true
+            };
+
+
+
+            //wrap this in a try catch block for FileNotFound or Win32Execption
+            Process process = Process.Start(startInfo);
+            //check for null before waiting for it
+            process.WaitForExit();
+            Console.Clear();
+        }
+
+    */
+
+
 }
 
 class Controller
 {
     private readonly GameScanner _scannerTool;
     private readonly DataBase _databaseTool;
+    
     //this class owns the Scanner/Game/Database classes.... wait no. Use Dependency Injection instead.
     //takes in UI commands and acts on them
     //tells UI what to print
