@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 
@@ -34,7 +35,9 @@ Console.ReadKey();
 //DONE - Fix FolderCheck method and remove flow control from try block
 //DONE - method to grab the exe for a unity game inside its own folder
 //DONE - Add robustness to filescanner to extract Zip Files
-//Incorporate Event Driven UI AFTER decoupling UI from logic classes
+//DONE - Incorporate Event Driven UI AFTER decoupling UI from logic classes
+//Write Game pathes to JSON file after scanning. Check file before scannining in intialization
+
 
 public class UI
 {
@@ -87,80 +90,66 @@ public class UI
 
 public class GameScanner
 {
-    public IEnumerable<string> GameFolders { get; set; } //list of game directories. Basically my list of games
-
-    public string?  documentsPath { get; set;} //gets us to MyDocuments
-    public string? GamesDirectory { get;private set; } //Path to StudentGamesFolder
-    public string[]? zipFiles { get; set; } // place for zipfiles before extraction
+    public IEnumerable<string> GameFolders { get; set; }
+    public string? documentsPath { get; set; }
+    public string? GamesDirectory { get; private set; }
+    public string[]? zipFiles { get; set; }
 
     public event EventHandler<GameFoundEvent>? GameFound;
 
-
     public GameScanner()
     {
-        documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); //gets us to MyDocuments folder
-        GamesDirectory = Path.Combine(documentsPath, "StudentGames"); //gets us to the student game folder
-
+        documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        GamesDirectory = Path.Combine(documentsPath, "StudentGames");
     }
-     
+
     public void Scan()
     {
+        // Step 1: Secure the base directory structure first
+        EnsureDirectoryExists();
 
-        InitializeFolder(); //checks if game folder exists and creates one and sets the property to the right path
-
+        // Step 2: Unpack any zip packages so they are fully extracted directories
         DealWithZipFiles();
+
+        // Step 3: Now that disk state is settled, discover all game folders
+        DiscoverGameFolders();
     }
+
+    private void EnsureDirectoryExists()
+    {
+        if (!Directory.Exists(GamesDirectory))
+        {
+            Directory.CreateDirectory(GamesDirectory);
+            // Optional: Raise event to tell user to drop games here
+        }
+    }
+
     public void DealWithZipFiles()
     {
         zipFiles = Directory.GetFiles(GamesDirectory, "*.zip");
         if (zipFiles.Length > 0)
         {
-             foreach (string file in zipFiles)
-            {
-
-                Console.WriteLine($"{file}");
-            }
-           
             foreach (string file in zipFiles)
             {
-                try { ZipFile.ExtractToDirectory(file, GamesDirectory);
-
+                try
+                {
+                    ZipFile.ExtractToDirectory(file, GamesDirectory);
                     File.Delete(file);
                 }
                 catch (Exception)
                 {
-                    
                     continue;
                 }
-
             }
         }
     }
-    public void InitializeFolder() 
+
+    private void DiscoverGameFolders()
     {
-
-        if (!Directory.Exists(GamesDirectory))
-        {
-            
-            //raise event that folder is missing and we are creating one
-
-            Directory.CreateDirectory(GamesDirectory);
-
-            //raise event to tell user to add files to the new folder in MyDocuments
-        }
-        else
-        {
-             //raise event to tell user the folder was found
-
-        }
-
-
         this.GameFolders = Directory.EnumerateDirectories(GamesDirectory);
         foreach (string folder in this.GameFolders)
         {
-
             string gameName = Path.GetFileName(folder);
-            //raise event that a new game is found! 
             OnGameFound(new GameFoundEvent(gameName, folder));
         }
     }
@@ -180,10 +169,6 @@ public class GameScanner
         }
         return Directory.GetFiles(targetFolder, "*.exe").FirstOrDefault();
     }
-  
-   
-
-    
 }
 
 public class GameFoundEvent : EventArgs
@@ -196,25 +181,29 @@ public class GameFoundEvent : EventArgs
         GameName = gameName;
     }
 }
-//Game should be able to
-/*Contain meta-data for year created, author name(s), Title, ExecutablePath, ThumbnailPath, SchoolYear, 
-*Constructor that takes/asks for meta-data and sets a default if data is not given
-*Game needs to be able to broadcast updates to its metadata to the UI
-*/
+
 
 class Game
 {
+
+    //Game should be able to
+    /*Contain meta-data for year created, author name(s), Title, ExecutablePath, ThumbnailPath, SchoolYear, 
+    *Constructor that takes/asks for meta-data and sets a default if data is not given
+    *Game needs to be able to broadcast updates to its metadata to the UI
+    */
+
+
     //the good stuff for now
     public string Title { get; set; }
     public string ExecutablePath { get; set; }
 
-    //stuff to add later
-    List<string> AuthorNames {  get; set; }
-    string Tagline {  get; set; }
+    //optional stuff to add later
+    public List<string> AuthorNames {  get; set; }
+    public string Tagline {  get; set; }
     
-    string ThumbnailPath { get; set; }
+    public string ThumbnailPath { get; set; }
 
-    int SchoolYearCreated { get; set; }
+    public int SchoolYearCreated { get; set; }
 
     //Broadcast changes for metadata to UI
 
@@ -224,59 +213,41 @@ class Game
         Title = title;
     }
 
+    public Game()
+    {
+
+    }
     public void Launch()
     {
         //game launches itself
+        string? workingDirectory = Path.GetDirectoryName(ExecutablePath);
+
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
-            FileName = @$"{ExecutablePath}",
+            FileName = ExecutablePath,
+            WorkingDirectory = workingDirectory, // Forces the OS to run the game from its own folder
             UseShellExecute = true
         };
+
         try
         {
-            //wrap this in a try catch block for FileNotFound or Win32Execption
-            Process process = Process.Start(startInfo);
-            //check for null before waiting for it
-            process.WaitForExit();
+            Process? process = Process.Start(startInfo);
+            if (process != null)
+            {
+                process.WaitForExit();
+            }
             Console.Clear();
         }
-        catch (FileNotFoundException) { return; }
-        catch (Win32Exception) { return; }
-        catch (IOException) { return; }
-        
+        catch (Exception ex) when (ex is FileNotFoundException || ex is Win32Exception || ex is IOException)
+        {
+            return; // Cleanly catch execution errors without crashing the launcher
+        }
     }
 
 
 
 
-    /* string Game1Path = scanner.FindExecutableInFolder(response);
-
-        if (!File.Exists(Game1Path))
-        {
-            Console.WriteLine($"File Not Found at{Game1Path}");
-            return;
-        }
-        else
-        {
-            Console.Write($"Launching {response}...");
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = @$"{Game1Path}",
-                UseShellExecute = true
-            };
-
-
-
-            //wrap this in a try catch block for FileNotFound or Win32Execption
-            Process process = Process.Start(startInfo);
-            //check for null before waiting for it
-            process.WaitForExit();
-            Console.Clear();
-        }
-
-    */
-
-
+   
 }
 
 class Controller
@@ -300,6 +271,8 @@ class Controller
         _scannerTool = scannerTool;
         _databaseTool = databaseTool;
         _userInterface = userInterface;
+        List<Game> _internalGameList = _databaseTool.LoadGames(); 
+        MasterGameList = _internalGameList;
 
         _scannerTool.GameFound += OnGameFound;
     }
@@ -307,7 +280,7 @@ class Controller
     public void RunApp()
     {
         StartScanning();
-
+        SaveGames(MasterGameList);
         List<string> gameTitles = new List<string>();
         foreach (Game game in MasterGameList)
         {
@@ -323,22 +296,25 @@ class Controller
     }
     private void OnGameFound(object? sender, GameFoundEvent e)
     {
-        
-        string? exePath = _scannerTool.FindExecutableInFolder(e.GameName);
-
-        if (exePath != null)
+        if (!MasterGameList.Any(g => (g.Title).Equals(e.GameName, StringComparison.OrdinalIgnoreCase)))
         {
-            
-            Game newGame = new Game(e.GameName, exePath);
-            MasterGameList.Add(newGame);
+            string? exePath = _scannerTool.FindExecutableInFolder(e.GameName);
 
-            
-            _userInterface.OnGameFound(newGame.Title, e.FolderPath);
-        }
-        else
-        {
-            
-            _userInterface.DisplayError($"No .exe found in folder: {e.GameName}. Skipping.");
+            if (exePath != null)
+            {
+
+                Game newGame = new Game(e.GameName, exePath);
+                MasterGameList.Add(newGame);
+                
+               
+
+                _userInterface.OnGameFound(newGame.Title, e.FolderPath);
+            }
+            else
+            {
+
+                _userInterface.DisplayError($"No .exe found in folder: {e.GameName}. Skipping.");
+            }
         }
     }
 
@@ -369,6 +345,17 @@ class Controller
         }
     }
 
+
+    public void SaveGames(List<Game> games)
+    {
+        
+
+        _databaseTool.SaveGames(games);
+
+        
+    }
+
+
 }
 
 
@@ -378,4 +365,50 @@ class DataBase
     //Owns: JSON for config settings
     //writes metadata of games to JSON
     //Checks JOSN file when program starts and returns to the Controller class
+
+    public string configFile {  get; set; }
+    private readonly string _configFilePath;
+
+
+    public DataBase()
+    {
+        configFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "config.json");
+        _configFilePath = configFile;
+    }
+
+    public void SaveGames(List<Game> gamesToSave)
+    {
+        var options = new JsonSerializerOptions { WriteIndented = true };
+
+        string jsonString = JsonSerializer.Serialize(gamesToSave, options);
+        
+        File.WriteAllText(_configFilePath, jsonString);
+
+    }
+
+    public List<Game> LoadGames()
+    {
+        
+        if (File.Exists(_configFilePath))
+        {
+            string fileContents = File.ReadAllText(_configFilePath);
+            try
+            {
+                return JsonSerializer.Deserialize<List<Game>>(fileContents);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error Message: {ex.Message}");
+                return new List<Game>();
+            }
+        }
+        else
+        {
+            
+                return new List<Game>();
+            
+        }
+    }
+
+
 }
