@@ -9,4 +9,12 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Assets\defaultthumb.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\defaultthumb.png" />
+  </ItemGroup>
+
 </Project>

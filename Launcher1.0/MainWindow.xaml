@@ -6,12 +6,75 @@
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
         Title="StudentGameLauncher" Height="450" Width="800">
-    <Grid Margin="10" Background="#B2B9B9B9">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Title Header Bar -->
+            <RowDefinition Height="*"/>
+            <!-- Main Content Panel Area -->
+        </Grid.RowDefinitions>
 
-        <ItemsControl ItemsSource="{Binding Games}"></ItemsControl>
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Student Game Launcher" Foreground="Black" 
+                   FontSize="24" FontWeight="Bold" Margin="20,20,20,10"/>
 
+        <!-- Scrollable list window for when games exceed window bounds -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
 
-        
+            <!-- Bind to the ObservableCollection populated by your scanner loop -->
+            <ItemsControl ItemsSource="{Binding MasterGameList}">
 
+                <!-- WrapPanel forces cards to layout left-to-right before flowing downward -->
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" Margin="10"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <!-- Visual blueprint layout for each discovered Game item object -->
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="12" Width="210" Height="260" Margin="10" Background="#1E1E22" CornerRadius="8">
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="120"/>
+                                    <!-- Thumbnail slot -->
+                                    <RowDefinition Height="*"/>
+                                    <!-- Info and control details -->
+                                </Grid.RowDefinitions>
+
+                                <!-- Game Thumbnail Image with Fallbacks -->
+                                <Border Grid.Row="0" Background="#2A2A30" CornerRadius="4" ClipToBounds="True">
+                                    <Image Source="{Binding ThumbnailPath, TargetNullValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png', FallbackValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png'}" 
+                                           Stretch="UniformToFill"/>
+                                </Border>
+
+                                <!-- Metadata Display Info & Launch Controls -->
+                                <Grid Grid.Row="1" Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <!-- Text Labels -->
+                                        <RowDefinition Height="Auto"/>
+                                        <!-- Buttons Row -->
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Pulls Title property directly from your Game class instance -->
+                                    <StackPanel Grid.Row="0">
+                                        <TextBlock Text="{Binding Title}" Foreground="White" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="Local Unity Build" Foreground="#757585" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Links the button click to the method in MainWindow.xaml.cs -->
+                                    <Button Grid.Row="1" Content="LAUNCH GAME" Height="32"
+                                            Background="#007ACC" Foreground="White" FontWeight="SemiBold"
+                                            Click="PlayButton_Click"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </ScrollViewer>
     </Grid>
 </Window>
