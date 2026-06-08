@@ -16,7 +16,7 @@
 
         <!-- Header -->
         <TextBlock Grid.Row="0" Text="Student Game Launcher" Foreground="Black" 
-                   FontSize="24" FontWeight="Bold" Margin="20,20,20,10"/>
+                   FontSize="24" FontWeight="Bold" Margin="20,20,492,10"/>
 
         <!-- Scrollable list window for when games exceed window bounds -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -76,5 +76,7 @@
             </ItemsControl>
 
         </ScrollViewer>
+        <Button x:Name="Rescan_Button" Content="Rescan" Click="RescanButton_Click" HorizontalAlignment="Center" Height="26" Margin="0,23,0,0" VerticalAlignment="Top" Width="132"/>
+        <Button x:Name="Settings" Content="Settings" HorizontalAlignment="Left" Height="26" Margin="494,23,0,0" VerticalAlignment="Top" Width="132"/>
     </Grid>
 </Window>

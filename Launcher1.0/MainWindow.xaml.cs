@@ -49,6 +49,13 @@ namespace Launcher1._0
             _database.SaveGames(MasterGameList.ToList());
         }
 
+        private void RescanButton_Click(object sender, RoutedEventArgs e)
+        {
+            MasterGameList.Clear();
+            _gamescanner.Scan();
+            _database.SaveGames(MasterGameList.ToList());
+        }
+
 
         private void OnGameFound(object? sender, GameFoundEvent e)
         {
