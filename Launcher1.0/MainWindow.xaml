@@ -34,7 +34,7 @@
                 <!-- Visual blueprint layout for each discovered Game item object -->
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="12" Width="210" Height="260" Margin="10" Background="#1E1E22" CornerRadius="8">
+                        <Border Padding="12" Width="210" Height="260" Margin="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <Grid >
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="120"/>
@@ -44,7 +44,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Game Thumbnail Image with Fallbacks -->
-                                <Border Grid.Row="0" Background="#2A2A30" CornerRadius="4" ClipToBounds="True">
+                                <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" ClipToBounds="True">
                                     <Image Source="{Binding ThumbnailPath, TargetNullValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png', FallbackValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png'}" 
                                            Stretch="UniformToFill"/>
                                 </Border>
@@ -79,4 +79,9 @@
         <Button x:Name="Rescan_Button" Content="Rescan" Click="RescanButton_Click" HorizontalAlignment="Center" Height="26" Margin="0,23,0,0" VerticalAlignment="Top" Width="132"/>
         <Button x:Name="Settings" Content="Settings" HorizontalAlignment="Left" Height="26" Margin="494,23,0,0" VerticalAlignment="Top" Width="132"/>
     </Grid>
+
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="Purple"/>
+    </Window.Resources>
 </Window>
