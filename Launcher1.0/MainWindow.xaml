@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
         Title="StudentGameLauncher" Height="450" Width="800">
+    
+    
+    
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,22 +21,24 @@
         <!-- Header -->
         <TextBlock Grid.Row="0" Text="Student Game Launcher" Foreground="Black" 
                    FontSize="24" FontWeight="Bold" Margin="20,20,492,10"/>
-
+        
+        
+        
         <!-- Scrollable list window for when games exceed window bounds -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
 
             <!-- Bind to the ObservableCollection populated by your scanner loop -->
-            <ItemsControl ItemsSource="{Binding MasterGameList}">
+            <ListBox ItemsSource="{Binding MasterGameList}">
 
                 <!-- WrapPanel forces cards to layout left-to-right before flowing downward -->
-                <ItemsControl.ItemsPanel>
+                <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" Margin="10"/>
                     </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                </ListBox.ItemsPanel>
 
                 <!-- Visual blueprint layout for each discovered Game item object -->
-                <ItemsControl.ItemTemplate>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border Padding="12" Width="210" Height="260" Margin="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <Grid >
@@ -72,8 +78,8 @@
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
         </ScrollViewer>
         <Button x:Name="Rescan_Button" Content="Rescan" Click="RescanButton_Click" HorizontalAlignment="Center" Height="26" Margin="0,23,0,0" VerticalAlignment="Top" Width="132"/>

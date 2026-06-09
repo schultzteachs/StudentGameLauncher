@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+//using Windows.Gaming.Input;
 
 namespace Launcher1._0
 {
@@ -33,7 +34,9 @@ namespace Launcher1._0
             this.DataContext = this;
 
             InitializeLauncher();
-            
+            //SetupGamepadPolling();
+
+            //Loaded += (s, e) => GameListBox.Focus();
         }
         private void InitializeLauncher()
         {
