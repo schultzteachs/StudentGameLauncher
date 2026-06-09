@@ -25,10 +25,10 @@
         
         
         <!-- Scrollable list window for when games exceed window bounds -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" >
 
             <!-- Bind to the ObservableCollection populated by your scanner loop -->
-            <ListBox ItemsSource="{Binding MasterGameList}">
+            <ListBox x:Name="MenuBox" ItemsSource="{Binding MasterGameList}" SelectedIndex="0" TabIndex="0" Background="#FF797474" ForceCursor="True">
 
                 <!-- WrapPanel forces cards to layout left-to-right before flowing downward -->
                 <ListBox.ItemsPanel>
@@ -67,12 +67,12 @@
                                     <!-- Pulls Title property directly from your Game class instance -->
                                     <StackPanel Grid.Row="0">
                                         <TextBlock Text="{Binding Title}" Foreground="White" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="Local Unity Build" Foreground="#757585" FontSize="11" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding AuthorNames}" Foreground="White" FontSize="11" Margin="0,2,0,0"/>
                                     </StackPanel>
 
                                     <!-- Links the button click to the method in MainWindow.xaml.cs -->
                                     <Button Grid.Row="1" Content="LAUNCH GAME" Height="32"
-                                            Background="#007ACC" Foreground="White" FontWeight="SemiBold"
+                                            Background="Black" Foreground="White" FontWeight="SemiBold"
                                             Click="PlayButton_Click"/>
                                 </Grid>
                             </Grid>

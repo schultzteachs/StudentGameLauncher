@@ -34,9 +34,10 @@ namespace Launcher1._0
             this.DataContext = this;
 
             InitializeLauncher();
+            
             //SetupGamepadPolling();
 
-            //Loaded += (s, e) => GameListBox.Focus();
+            Loaded += (s, e) => MenuBox.Focus();
         }
         private void InitializeLauncher()
         {
@@ -50,7 +51,18 @@ namespace Launcher1._0
             _gamescanner.GameFound += OnGameFound;
             _gamescanner.Scan();
             _database.SaveGames(MasterGameList.ToList());
+
+            
+            MenuBox.SelectedIndex = 0;
         }
+
+        private void SetupGamepadPolling()
+        {
+
+        }
+
+
+
 
         private void RescanButton_Click(object sender, RoutedEventArgs e)
         {
@@ -87,7 +99,7 @@ namespace Launcher1._0
     }
 
 
-
+    /*
 public class UI
     {
         //List<string> options = new List<string>(); 
@@ -136,7 +148,7 @@ public class UI
             DisplayError("File path bad or not found!");
         }
     }
-
+    */
     public class GameScanner
     {
         public IEnumerable<string> GameFolders { get; set; }
@@ -228,6 +240,7 @@ public class UI
         {
             FolderPath = folderPath;
             GameName = gameName;
+
         }
     }
 
@@ -247,7 +260,7 @@ public class UI
         public string ExecutablePath { get; set; }
 
         //optional stuff to add later
-        public List<string> AuthorNames { get; set; }
+        public string AuthorNames = "GameDesign";
         public string Tagline { get; set; }
 
         public string ThumbnailPath { get; set; }
@@ -260,6 +273,7 @@ public class UI
         {
             ExecutablePath = ExePath;
             Title = title;
+            
         }
 
         public Game()
