@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
-        Title="StudentGameLauncher" Height="450" Width="800">
-    
-    
-    
+        Title="StudentGameLauncher" Height="450" Width="800"
+        >
+
+
     
     <Grid>
         <Grid.RowDefinitions>
@@ -40,7 +40,12 @@
                 <!-- Visual blueprint layout for each discovered Game item object -->
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="12" Width="210" Height="260" Margin="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+
+
+
+                        <Border x:Name="CardBorder" Padding="12" Width="210" Height="260" Margin="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+                            
+                           
                             <Grid >
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="120"/>
@@ -77,6 +82,9 @@
                                 </Grid>
                             </Grid>
                         </Border>
+
+                      
+                        
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -89,5 +97,16 @@
 
     <Window.Resources>
         <SolidColorBrush x:Key="CardBackgroundBrush" Color="Purple"/>
+        <Style TargetType="ListBoxItem">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderBrush" Value="WhiteSmoke"/>
+                    <Setter Property="BorderThickness" Value="8"/>
+                    <Setter Property="Margin" Value="2"/>
+                </Trigger>
+            </Style.Triggers> 
+        </Style>
+        
+        
     </Window.Resources>
 </Window>
