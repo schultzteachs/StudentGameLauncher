@@ -52,7 +52,7 @@
             <Run Text="{Binding SchoolName}"/> 
             <Run Text=" Student Game Launcher"/>
         </TextBlock>
-        <TextBlock Grid.Row="0" Text="Schultz" Foreground="Gray" FontSize="10" HorizontalAlignment="Right" Margin="0,0,0,0" />
+        <TextBlock Grid.Row="0" Text="Schultz" Foreground="Gray" FontSize="10"  HorizontalAlignment="Right" Margin="0,0,0,0" />
 
         <ListBox x:Name="Options" Grid.Row="1" 
                  SelectedIndex="0"

@@ -54,31 +54,33 @@ namespace Launcher1._0
 
             InitializeLauncher();
             
-            //SetupGamepadPolling();
+           
 
             Loaded += (s, e) => MenuBox.Focus();
-            //this._schoolName = "Duluth High School";
+           
         }
         private void InitializeLauncher()
         {
-            var savedGames = _database.LoadGames();
-            foreach (var game in savedGames)
+            var saveFile = _database.LoadApp();
+            this._schoolName = saveFile.SchoolName;
+            var GameList = saveFile.Games;
+            foreach (var game in GameList)
             {
                 MasterGameList.Add(game);
             }
 
-      
+            
             _gamescanner.GameFound += OnGameFound;
             _gamescanner.Scan();
             _database.SaveGames(MasterGameList.ToList());
-
+            
             
             MenuBox.SelectedIndex = 0;
         }
 
         private void SetupGamepadPolling()
         {
-
+            //for joystick controller/generic USB device
         }
 
 
@@ -104,7 +106,7 @@ namespace Launcher1._0
 
         private void OpenSettingsWindow()
         {
-            MessageBox.Show("Settings opening!");
+            MessageBox.Show("Settings opening! Use a keyboard to make changes.");
         }
 
 
@@ -561,24 +563,23 @@ public class UI
 
         public string configFile { get; set; }
         private readonly string _configFilePath;
-
+        public LauncherSettings _laucherSettings { get; set; }
 
         public DataBase()
         {
             configFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StudentGames\\config.json");
             _configFilePath = configFile;
+            _laucherSettings = LoadApp();
         }
 
+        
         public void SaveGames(List<Game> gamesToSave)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-
-            string jsonString = JsonSerializer.Serialize(gamesToSave, options);
-
-            File.WriteAllText(_configFilePath, jsonString);
-
+            _laucherSettings.Games = gamesToSave;
+            SaveApp(_laucherSettings);
         }
 
+        /*
         public List<Game> LoadGames()
         {
 
@@ -602,8 +603,38 @@ public class UI
 
             }
         }
+        */
+        public void SaveApp(LauncherSettings settings)
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true };
 
+            string jsonString = JsonSerializer.Serialize(settings, options);
 
+            File.WriteAllText(_configFilePath, jsonString);
+        }
+
+        public LauncherSettings LoadApp()
+        {
+            if (File.Exists(_configFilePath))
+            {
+                string fileContents = File.ReadAllText(_configFilePath);
+                try
+                {
+                    return JsonSerializer.Deserialize<LauncherSettings>(fileContents);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error Message: settings file not found or there was an issue. Creating a new one.");
+                    return new LauncherSettings();
+                }
+            }
+            else
+            {
+
+                return new LauncherSettings();
+
+            }
+        }
     }
 
     public class LauncherSettings
