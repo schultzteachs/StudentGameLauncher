@@ -5,108 +5,118 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
-        Title="StudentGameLauncher" Height="450" Width="800"
-        >
+        Title="Student Game Launcher" Height="550" Width="900" Background="#121212"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="Purple"/>
 
+        <Style x:Key="UtilityItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="#222"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="White"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-    
+        <Style x:Key="GameCardItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="10,0,10,0"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderBrush" Value="WhiteSmoke"/>
+                    <Setter Property="BorderThickness" Value="6"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Title Header Bar -->
-            <RowDefinition Height="*"/>
-            <!-- Main Content Panel Area -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Student Game Launcher" Foreground="Black" 
-                   FontSize="24" FontWeight="Bold" Margin="20,20,492,10"/>
-        
-        
-        
-        <!-- Scrollable list window for when games exceed window bounds -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" >
+        <TextBlock Grid.Row="0" Foreground="White" FontSize="24" FontWeight="Bold" Margin="25,25,25,15">
+            <Run Text="{Binding SchoolName}"/> 
+            <Run Text=" Student Game Launcher"/>
+        </TextBlock>
+        <TextBlock Grid.Row="0" Text="Schultz" Foreground="Gray" FontSize="10" HorizontalAlignment="Right" Margin="0,0,0,0" />
 
-            <!-- Bind to the ObservableCollection populated by your scanner loop -->
-            <ListBox x:Name="MenuBox" ItemsSource="{Binding MasterGameList}" SelectedIndex="0" TabIndex="0" Background="#FF797474" ForceCursor="True">
+        <ListBox x:Name="Options" Grid.Row="1" 
+                 SelectedIndex="0"
+                 ItemContainerStyle="{StaticResource UtilityItemStyle}"
+                 KeyDown="Options_KeyDown" PreviewMouseLeftButtonUp="Options_MouseClick"
+                 Background="Transparent" BorderThickness="0" Margin="25,0,25,20">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
 
-                <!-- WrapPanel forces cards to layout left-to-right before flowing downward -->
+            <ListBoxItem Content="Rescan Games"/>
+            <ListBoxItem Content="Launcher Settings"/>
+        </ListBox>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+
+            <ListBox x:Name="MenuBox" 
+                     ItemsSource="{Binding MasterGameList}" 
+                     ItemContainerStyle="{StaticResource GameCardItemStyle}"
+                     SelectedIndex="-1" 
+                     Background="Transparent" BorderThickness="0" Padding="15,10">
+
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" Margin="10"/>
+                        <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
 
-                <!-- Visual blueprint layout for each discovered Game item object -->
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-
-
-
-                        <Border x:Name="CardBorder" Padding="12" Width="210" Height="260" Margin="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
-                            
-                           
-                            <Grid >
+                        <Border x:Name="CardBorder" Padding="12" Width="210" Height="280" Background="{StaticResource CardBackgroundBrush}" CornerRadius="8">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="120"/>
-                                    <!-- Thumbnail slot -->
                                     <RowDefinition Height="*"/>
-                                    <!-- Info and control details -->
                                 </Grid.RowDefinitions>
 
-                                <!-- Game Thumbnail Image with Fallbacks -->
-                                <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" ClipToBounds="True">
-                                    <Image Source="{Binding ThumbnailPath, TargetNullValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png', FallbackValue='pack://application:,,,/Launcher1.0;component/Assets/defaultthumb.png'}" 
+                                <Border Grid.Row="0" Background="#1A1A1A" CornerRadius="4" ClipToBounds="True">
+                                    <Image Source="{Binding ThumbnailPath, TargetNullValue='pack://application:,,,/Assets/defaultthumb.png', FallbackValue='pack://application:,,,/Assets/defaultthumb.png'}" 
                                            Stretch="UniformToFill"/>
                                 </Border>
 
-                                <!-- Metadata Display Info & Launch Controls -->
                                 <Grid Grid.Row="1" Margin="0,10,0,0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
-                                        <!-- Text Labels -->
                                         <RowDefinition Height="Auto"/>
-                                        <!-- Buttons Row -->
                                     </Grid.RowDefinitions>
 
-                                    <!-- Pulls Title property directly from your Game class instance -->
                                     <StackPanel Grid.Row="0">
                                         <TextBlock Text="{Binding Title}" Foreground="White" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding AuthorNames}" Foreground="White" FontSize="11" Margin="0,2,0,0"/>
+                                        <TextBlock Text="AuthorNames" Foreground="#DDDDDD" FontSize="11" Margin="0,2,0,0"/>
                                     </StackPanel>
 
-                                    <!-- Links the button click to the method in MainWindow.xaml.cs -->
                                     <Button Grid.Row="1" Content="LAUNCH GAME" Height="32"
                                             Background="Black" Foreground="White" FontWeight="SemiBold"
                                             Click="PlayButton_Click"/>
                                 </Grid>
                             </Grid>
                         </Border>
-
-                      
-                        
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-
         </ScrollViewer>
-        <Button x:Name="Rescan_Button" Content="Rescan" Click="RescanButton_Click" HorizontalAlignment="Center" Height="26" Margin="0,23,0,0" VerticalAlignment="Top" Width="132"/>
-        <Button x:Name="Settings" Content="Settings" HorizontalAlignment="Left" Height="26" Margin="494,23,0,0" VerticalAlignment="Top" Width="132"/>
     </Grid>
-
-
-    <Window.Resources>
-        <SolidColorBrush x:Key="CardBackgroundBrush" Color="Purple"/>
-        <Style TargetType="ListBoxItem">
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="BorderBrush" Value="WhiteSmoke"/>
-                    <Setter Property="BorderThickness" Value="8"/>
-                    <Setter Property="Margin" Value="2"/>
-                </Trigger>
-            </Style.Triggers> 
-        </Style>
-        
-        
-    </Window.Resources>
 </Window>

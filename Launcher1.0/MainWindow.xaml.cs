@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -25,8 +26,26 @@ namespace Launcher1._0
     {
         private readonly DataBase _database = new DataBase();
         private readonly GameScanner _gamescanner = new GameScanner();
+        
+        private string _schoolName = "Default School";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public string SchoolName
+        {
+            get => _schoolName;
+            set
+            {
+                if (_schoolName != value)
+                {
+                    _schoolName = value;
+                    OnPropertyChanged(); // Tells the UI to update
+                }
+            }
+        }
 
         public ObservableCollection<Game> MasterGameList { get; set; } = new ObservableCollection<Game>();
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +57,7 @@ namespace Launcher1._0
             //SetupGamepadPolling();
 
             Loaded += (s, e) => MenuBox.Focus();
+            //this._schoolName = "Duluth High School";
         }
         private void InitializeLauncher()
         {
@@ -62,10 +82,35 @@ namespace Launcher1._0
         }
 
 
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+
+        private void ExecuteOptionAction()
+        {
+            if (Options.SelectedIndex == 0)
+            {
+                RescanButton_Click(this, null);
+            }
+            else if (Options.SelectedIndex == 1)
+            {
+                OpenSettingsWindow();
+            }
+        }
+
+
+        private void OpenSettingsWindow()
+        {
+            MessageBox.Show("Settings opening!");
+        }
 
 
         private void RescanButton_Click(object sender, RoutedEventArgs e)
         {
+            MessageBox.Show("Rescanning for games!");
             MasterGameList.Clear();
             _gamescanner.Scan();
             _database.SaveGames(MasterGameList.ToList());
@@ -87,6 +132,71 @@ namespace Launcher1._0
                 }
             }
         }
+
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // CASE 1: Focus is currently up top on Rescan / Settings options
+            if (Options.IsKeyboardFocusWithin)
+            {
+                if (e.Key == Key.Down)
+                {
+                    // If we have scanned games available, drop focus down
+                    if (MenuBox.Items.Count > 0)
+                    {
+                        Options.SelectedIndex = -1; // Uncheck top items visually
+                        MenuBox.SelectedIndex = 0;  // Target the first game card
+
+                        // Force focus shift to the dynamic item card container
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            var container = MenuBox.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem;
+                            container?.Focus();
+                        }), System.Windows.Threading.DispatcherPriority.Input);
+                    }
+                    e.Handled = true; // Input handled, stop event cascading
+                }
+            }
+            // CASE 2: Focus is currently traveling through the horizontal game card row
+            else if (MenuBox.IsKeyboardFocusWithin)
+            {
+                if (e.Key == Key.Up)
+                {
+                    MenuBox.SelectedIndex = -1; // Uncheck game list visually
+                    Options.SelectedIndex = 0;  // Target 'Rescan' button
+
+                    // Force focus shift back to the utility menu row container
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        var container = Options.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem;
+                        container?.Focus();
+                    }), System.Windows.Threading.DispatcherPriority.Input);
+
+                    e.Handled = true;
+                }
+            }
+        }
+
+        // --- UTILITY MENU SELECTION EXECUTION HOOKS ---
+        private void Options_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Space)
+            {
+                ExecuteOptionAction();
+                e.Handled = true;
+            }
+        }
+
+        private void Options_MouseClick(object sender, MouseButtonEventArgs e)
+        {
+            ExecuteOptionAction();
+        }
+
+ 
+
+     
+       
+
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             // WPF extracts the precise object bound to the specific button instance clicked
@@ -94,6 +204,24 @@ namespace Launcher1._0
             {
                 // Trigger the launching process loop written inside your Game class
                 selectedGame.Launch();
+            }
+        }
+
+        private void RemoveButton_Click(object ? sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is Game selectedGame)
+            {
+                
+                MasterGameList?.Remove(selectedGame);
+            }
+        }
+
+        private void EditButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is Game selectedGame)
+            {
+                // Trigger the launching process loop written inside your Game class
+                //MasterGameList?.Remove(selectedGame);
             }
         }
     }
@@ -437,7 +565,7 @@ public class UI
 
         public DataBase()
         {
-            configFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "config.json");
+            configFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StudentGames\\config.json");
             _configFilePath = configFile;
         }
 
@@ -478,7 +606,11 @@ public class UI
 
     }
 
-
+    public class LauncherSettings
+    {
+        public string SchoolName { get; set; } = "Default School";
+        public List<Game> Games { get; set; } = new List<Game>();
+    }
 
 
 }
