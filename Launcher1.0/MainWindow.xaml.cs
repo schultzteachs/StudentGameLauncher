@@ -68,7 +68,7 @@ namespace Launcher1._0
             {
                 MasterGameList.Add(game);
             }
-
+            
             
             _gamescanner.GameFound += OnGameFound;
             _gamescanner.Scan();
@@ -107,8 +107,25 @@ namespace Launcher1._0
         private void OpenSettingsWindow()
         {
             MessageBox.Show("Settings opening! Use a keyboard to make changes.");
-        }
+            SettingsWindow settingsPopup = new SettingsWindow(this.SchoolName);
+            settingsPopup.Owner = this;
+            bool? dialogResult = settingsPopup.ShowDialog();
 
+            if (dialogResult == true)
+            {
+                this._schoolName = settingsPopup.UpdatedSchoolName;
+                this.DataContext = null;
+                this.DataContext = this;
+                _database.SaveApp(new LauncherSettings
+                {
+                    SchoolName = this.SchoolName,
+                    Games = MasterGameList.ToList()
+                });
+               
+                MessageBox.Show("Settings Saved!");
+
+            }
+        }
 
         private void RescanButton_Click(object sender, RoutedEventArgs e)
         {
