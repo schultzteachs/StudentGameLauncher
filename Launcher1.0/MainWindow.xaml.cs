@@ -90,6 +90,7 @@ namespace Launcher1._0
         }
 
 
+        //MENU INDEXES!!!!
 
         private void ExecuteOptionAction()
         {
@@ -99,10 +100,25 @@ namespace Launcher1._0
             }
             else if (Options.SelectedIndex == 1)
             {
+                EditMetaData();
+            }
+            else if (Options.SelectedIndex == 2)
+            {
                 OpenSettingsWindow();
             }
         }
 
+        private void EditMetaData()
+        {
+            //mention need for keyboard to edit meta-data. Warn that removing games from Folder will require setting data again
+            MessageBox.Show("Opening meta-data window. You will need a keyboard. Any games removed from the directory StudentGames under MyDocuments will need meta-data reentered!");
+            //open meta-data window
+            
+            //window should have editable fields for each game and the corresponding meta-data
+            //When the user presses save, the meta-data for each specific game should be saved with it
+
+            //save the gamelist and app settings to the json file
+        }
 
         private void OpenSettingsWindow()
         {
@@ -199,7 +215,7 @@ namespace Launcher1._0
         // --- UTILITY MENU SELECTION EXECUTION HOOKS ---
         private void Options_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter || e.Key == Key.Space)
+            if (e.Key != Key.Escape)
             {
                 ExecuteOptionAction();
                 e.Handled = true;
@@ -407,12 +423,12 @@ public class UI
         public string ExecutablePath { get; set; }
 
         //optional stuff to add later
-        public string AuthorNames = "GameDesign";
-        public string Tagline { get; set; }
+        public string? AuthorNames { get; set; }
+        public string? Tagline { get; set; }
 
-        public string ThumbnailPath { get; set; }
+        public string? ThumbnailPath { get; set; }
 
-        public int SchoolYearCreated { get; set; }
+        public int? SchoolYearCreated { get; set; }
 
         //Broadcast changes for metadata to UI
 
@@ -420,7 +436,7 @@ public class UI
         {
             ExecutablePath = ExePath;
             Title = title;
-            
+           
         }
 
         public Game()
