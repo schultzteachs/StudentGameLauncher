@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
-        Title="Student Game Launcher" Height="550" Width="900" Background="#121212"
+        Title="Student Game Launcher" Height="550" Width="900" 
+        Background="{DynamicResource AppBackgroundBrush}"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
-        <SolidColorBrush x:Key="CardBackgroundBrush" Color="Purple"/>
+
 
         <Style x:Key="UtilityItemStyle" TargetType="ListBoxItem">
             <Setter Property="Background" Value="#222"/>
@@ -86,7 +87,7 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="CardBorder" Padding="12" Width="210" Height="280" Background="{StaticResource CardBackgroundBrush}" CornerRadius="8">
+                        <Border x:Name="CardBorder" Padding="12" Width="210" Height="280" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="120"/>

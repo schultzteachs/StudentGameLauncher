@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 
 namespace Launcher1._0
 {
@@ -30,6 +31,34 @@ namespace Launcher1._0
             // Setting DialogResult to true automatically closes the popup window
             this.DialogResult = true;
         }
+
+        private void BgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            // Verify a color was actually selected by the user
+            if (e.NewValue.HasValue)
+            {
+                // Create a new solid color brush using the picked value
+                SolidColorBrush newBgBrush = new SolidColorBrush(e.NewValue.Value);
+
+                // Update the global App.xaml resource mapping instantly
+                Application.Current.Resources["AppBackgroundBrush"] = newBgBrush;
+            }
+        }
+
+
+        private void CardColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            // Verify a color was actually selected by the user
+            if (e.NewValue.HasValue)
+            {
+                // Create a new solid color brush using the picked value
+                SolidColorBrush newBgBrush = new SolidColorBrush(e.NewValue.Value);
+
+                // Update the global App.xaml resource mapping instantly
+                Application.Current.Resources["CardBackgroundBrush"] = newBgBrush;
+            }
+        }
+
     }
 
 
