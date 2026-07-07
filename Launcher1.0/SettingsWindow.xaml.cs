@@ -9,6 +9,8 @@ namespace Launcher1._0
     public partial class SettingsWindow : Window
     {
         public string? UpdatedSchoolName { get; set; }
+        public string? UpdatedAppHex { get; private set; }
+        public string? UpdatedCardHex { get; private set; }
         public SettingsWindow()
         {
             InitializeComponent();
@@ -25,8 +27,19 @@ namespace Launcher1._0
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Capture the text from the box
+            // 1. Capture the text from the school name box
             UpdatedSchoolName = SchoolNameTextBox.Text;
+
+            // 2. Convert the color picker selections into Hex strings for MainWindow/JSON
+            if (BgColorPicker.SelectedColor.HasValue)
+            {
+                UpdatedAppHex = ColorToHex(BgColorPicker.SelectedColor.Value);
+            }
+
+            if (CardColorPicker.SelectedColor.HasValue)
+            {
+                UpdatedCardHex = ColorToHex(CardColorPicker.SelectedColor.Value);
+            }
 
             // Setting DialogResult to true automatically closes the popup window
             this.DialogResult = true;
@@ -45,7 +58,6 @@ namespace Launcher1._0
             }
         }
 
-
         private void CardColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             // Verify a color was actually selected by the user
@@ -59,6 +71,13 @@ namespace Launcher1._0
             }
         }
 
+        /// <summary>
+        /// Helper method to turn a WPF Color struct into a standard "#RRGGBB" hex string
+        /// </summary>
+        private string ColorToHex(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
     }
 
 

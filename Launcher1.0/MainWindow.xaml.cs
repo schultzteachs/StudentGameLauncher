@@ -42,6 +42,38 @@ namespace Launcher1._0
                 }
             }
         }
+        private string _appBackgroundHex = "#121212";
+        private string _cardBackgroundHex = "#800080";
+
+        // WPF Window Background binds directly to this Brush
+        public Brush AppBackground
+        {
+            get
+            {
+                Brush brush;
+                try { brush = (Brush)new BrushConverter().ConvertFromString(_appBackgroundHex); }
+                catch { brush = new SolidColorBrush(Color.FromRgb(18, 18, 18)); } // Fallback
+
+                // Ensure the global application resource is updated so XAML elements find it
+                Application.Current.Resources["AppBackgroundBrush"] = brush;
+                return brush;
+            }
+        }
+
+        // WPF Resource Dictionary CardColor binds directly to this Color struct
+        public Color CardColor
+        {
+            get
+            {
+                Color color;
+                try { color = (Color)ColorConverter.ConvertFromString(_cardBackgroundHex); }
+                catch { color = Color.FromRgb(128, 0, 128); } // Fallback Purple
+
+                // Ensure the global application resource is updated for your cards
+                Application.Current.Resources["CardBackgroundBrush"] = new SolidColorBrush(color);
+                return color;
+            }
+        }
 
         public ObservableCollection<Game> MasterGameList { get; set; } = new ObservableCollection<Game>();
 
@@ -63,6 +95,13 @@ namespace Launcher1._0
         {
             var saveFile = _database.LoadApp();
             this._schoolName = saveFile.SchoolName;
+
+            this._appBackgroundHex = saveFile.AppBackgroundHex ?? "#121212";
+            this._cardBackgroundHex = saveFile.CardBackgroundHex ?? "#800080";
+
+            var primaryBg = this.AppBackground;
+            var cardBg = this.CardColor;
+
             var GameList = saveFile.Games;
             foreach (var game in GameList)
             {
@@ -130,12 +169,16 @@ namespace Launcher1._0
             if (dialogResult == true)
             {
                 this._schoolName = settingsPopup.UpdatedSchoolName;
+                this._appBackgroundHex = settingsPopup.UpdatedAppHex;
+                this._cardBackgroundHex = settingsPopup.UpdatedCardHex;
                 this.DataContext = null;
                 this.DataContext = this;
                 _database.SaveApp(new LauncherSettings
                 {
                     SchoolName = this.SchoolName,
-                    Games = MasterGameList.ToList()
+                    Games = MasterGameList.ToList(),
+                    AppBackgroundHex = this._appBackgroundHex,
+                    CardBackgroundHex = this._cardBackgroundHex
                 });
                
                 MessageBox.Show("Settings Saved!");
@@ -674,6 +717,13 @@ public class UI
     {
         public string SchoolName { get; set; } = "Default School";
         public List<Game> Games { get; set; } = new List<Game>();
+
+        public string AppBackgroundHex { get; set; } = "#121212";
+        public string CardBackgroundHex { get; set; } = "#800080";
+
+       
+
+
     }
 
 
