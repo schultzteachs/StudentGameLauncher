@@ -147,10 +147,25 @@ namespace Launcher1._0
             MessageBox.Show("Opening meta-data window. You will need a keyboard. Any games removed from the directory StudentGames under MyDocuments will need meta-data reentered!");
             //open meta-data window
 
-            //window should have editable fields for each game and the corresponding meta-data
-            //When the user presses save, the meta-data for each specific game should be saved with it
+            MetaDataWindow metadataPopup = new MetaDataWindow(this.MasterGameList);
+            metadataPopup.Owner = this;
+            bool? dialogResult = metadataPopup.ShowDialog();
 
-            //save the gamelist and app settings to the json file
+            if (dialogResult == true)
+            {
+                this.DataContext = null;
+                this.DataContext = this;
+                _database.SaveGames(MasterGameList.ToList());
+
+                MessageBox.Show("Settings Saved!");
+
+
+
+                //window should have editable fields for each game and the corresponding meta-data
+                //When the user presses save, the meta-data for each specific game should be saved with it
+
+                //save the gamelist and app settings to the json file
+            }
         }
 
         private void OpenSettingsWindow()

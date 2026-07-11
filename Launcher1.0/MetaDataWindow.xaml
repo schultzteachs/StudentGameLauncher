@@ -5,8 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
-        Title="MetaDataWindow" Height="450" Width="800">
-    <Grid>
+        Title="MetaDataWindow" Height="450" Width="700"
+        >
+    <Grid Margin="20" Background="#1E1E1E">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <!-- Sidebar Column -->
+            <ColumnDefinition Width="*"/>
+            <!-- Editor Form Column -->
+        </Grid.ColumnDefinitions>
         
+        
+        <ListBox
+            Grid.Column="0"
+            x:Name="GameSideBar"
+            ItemsSource="{Binding}"
+            DisplayMemberPath="Title"
+            />
+
+        <StackPanel
+            Grid.Column="1" 
+            DataContext="{Binding ElementName=GameSideBar, Path=SelectedItem}" Margin="20">
+
+            <TextBlock Text="Edit Game Title:"/>
+            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Text="Edit Authors: (optional)"/>
+            <TextBox Text="{Binding AuthorNames, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Text="Edit Tagline: (optional)"/>
+            <TextBox Text="{Binding Tagline, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Text="Edit School Year: (optional)"/>
+            <TextBox Text="{Binding SchoolYearCreated, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Text="Edit Game Thumbnail FilePath: (optional)"/>
+            <TextBox Text="{Binding ThumbnailPath, UpdateSourceTrigger=PropertyChanged}"/>
+
+        
+
+
+        </StackPanel>
+
+
     </Grid>
 </Window>
