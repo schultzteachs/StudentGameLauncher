@@ -4,17 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 //using Windows.Gaming.Input;
 
 namespace Launcher1._0
@@ -26,7 +20,7 @@ namespace Launcher1._0
     {
         private readonly DataBase _database = new DataBase();
         private readonly GameScanner _gamescanner = new GameScanner();
-        
+
         private string _schoolName = "Default School";
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -85,11 +79,11 @@ namespace Launcher1._0
             this.DataContext = this;
 
             InitializeLauncher();
-            
-           
+
+
 
             Loaded += (s, e) => MenuBox.Focus();
-           
+
         }
         private void InitializeLauncher()
         {
@@ -107,13 +101,13 @@ namespace Launcher1._0
             {
                 MasterGameList.Add(game);
             }
-            
-            
+
+
             _gamescanner.GameFound += OnGameFound;
             _gamescanner.Scan();
             _database.SaveGames(MasterGameList.ToList());
-            
-            
+
+
             MenuBox.SelectedIndex = 0;
         }
 
@@ -152,7 +146,7 @@ namespace Launcher1._0
             //mention need for keyboard to edit meta-data. Warn that removing games from Folder will require setting data again
             MessageBox.Show("Opening meta-data window. You will need a keyboard. Any games removed from the directory StudentGames under MyDocuments will need meta-data reentered!");
             //open meta-data window
-            
+
             //window should have editable fields for each game and the corresponding meta-data
             //When the user presses save, the meta-data for each specific game should be saved with it
 
@@ -180,7 +174,7 @@ namespace Launcher1._0
                     AppBackgroundHex = this._appBackgroundHex,
                     CardBackgroundHex = this._cardBackgroundHex
                 });
-               
+
                 MessageBox.Show("Settings Saved!");
 
             }
@@ -202,7 +196,7 @@ namespace Launcher1._0
                 string? exePath = _gamescanner.FindExecutableInFolder(e.GameName);
                 if (exePath != null)
                 {
-                   
+
                     Game newGame = new Game(e.GameName, exePath);
 
                     // Crucial: UI additions must run via the Dispatcher if called from backend threads
@@ -270,10 +264,10 @@ namespace Launcher1._0
             ExecuteOptionAction();
         }
 
- 
 
-     
-       
+
+
+
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
@@ -285,11 +279,11 @@ namespace Launcher1._0
             }
         }
 
-        private void RemoveButton_Click(object ? sender, RoutedEventArgs e)
+        private void RemoveButton_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement element && element.DataContext is Game selectedGame)
             {
-                
+
                 MasterGameList?.Remove(selectedGame);
             }
         }
@@ -479,7 +473,7 @@ public class UI
         {
             ExecutablePath = ExePath;
             Title = title;
-           
+
         }
 
         public Game()
@@ -648,7 +642,7 @@ public class UI
             _laucherSettings = LoadApp();
         }
 
-        
+
         public void SaveGames(List<Game> gamesToSave)
         {
             _laucherSettings.Games = gamesToSave;
@@ -721,7 +715,7 @@ public class UI
         public string AppBackgroundHex { get; set; } = "#121212";
         public string CardBackgroundHex { get; set; } = "#800080";
 
-       
+
 
 
     }
