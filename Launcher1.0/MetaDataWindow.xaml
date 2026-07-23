@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher1._0"
         mc:Ignorable="d"
-        Title="MetaDataWindow" Height="450" Width="700"
+        Title="MetaDataWindow" Height="250" Width="700"
         >
-    <Grid Margin="20" Background="#1E1E1E">
+    <Grid Margin="20" Background="{DynamicResource AppBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <!-- Sidebar Column -->
@@ -32,10 +32,11 @@
 
             <TextBlock Text="Edit Authors: (optional)"/>
             <TextBox Text="{Binding AuthorNames, UpdateSourceTrigger=PropertyChanged}"/>
-
+<!--
             <TextBlock Text="Edit Tagline: (optional)"/>
             <TextBox Text="{Binding Tagline, UpdateSourceTrigger=PropertyChanged}"/>
-
+            
+            
             <TextBlock Text="Edit School Year: (optional)"/>
             <TextBox Text="{Binding SchoolYearCreated, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -43,7 +44,7 @@
             <TextBox Text="{Binding ThumbnailPath, UpdateSourceTrigger=PropertyChanged}"/>
 
         
-
+            -->
 
         </StackPanel>
 
