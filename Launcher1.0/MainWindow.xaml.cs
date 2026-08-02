@@ -9,6 +9,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Windows.Gaming.Input;
+using System.Windows.Threading;
 //using Windows.Gaming.Input;
 
 namespace Launcher1._0
@@ -20,6 +22,10 @@ namespace Launcher1._0
     {
         private readonly DataBase _database = new DataBase();
         private readonly GameScanner _gamescanner = new GameScanner();
+
+        private DispatcherTimer _gamepadTimer;
+        private bool _wasButtonPressed = false;
+
 
         private string _schoolName = "Default School";
 
@@ -38,6 +44,8 @@ namespace Launcher1._0
         }
         private string _appBackgroundHex = "#121212";
         private string _cardBackgroundHex = "#800080";
+        private DateTime _lastNavTime = DateTime.MinValue;
+        private readonly TimeSpan _navCooldown = TimeSpan.FromMilliseconds(180); // Delays rapid scrolling
 
         // WPF Window Background binds directly to this Brush
         public Brush AppBackground
@@ -80,10 +88,29 @@ namespace Launcher1._0
 
             InitializeLauncher();
 
+            _gamepadTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _gamepadTimer.Tick += GamepadTimer_Tick;
+            
 
-
-            Loaded += (s, e) => MenuBox.Focus();
-
+            Loaded += (s, e) =>
+            {
+                if (MenuBox.Items.Count > 0)
+                {
+                    MenuBox.SelectedIndex = 0;
+                    FocusContainer(MenuBox, 0);
+                    _gamepadTimer.Start();
+                }
+            };
+            Activated += (s, e) =>
+            {
+                if (Options != null && MenuBox != null)
+                {
+                    if (!Options.IsKeyboardFocusWithin && !MenuBox.IsKeyboardFocusWithin)
+                    {
+                        FocusContainer(MenuBox, MenuBox.SelectedIndex >= 0 ? MenuBox.SelectedIndex : 0);
+                    }
+                }
+            };
         }
         private void InitializeLauncher()
         {
@@ -111,12 +138,149 @@ namespace Launcher1._0
             MenuBox.SelectedIndex = 0;
         }
 
-        private void SetupGamepadPolling()
+        private void GamepadTimer_Tick(object? sender, EventArgs e)
         {
-            //for joystick controller/generic USB device
+            try
+            {
+                var gamepads = Gamepad.Gamepads;
+
+                // DEBUG: Shows in your window title bar whether C# detects your controller
+                this.Title = gamepads.Count > 0 ? $"Launcher - Controller Connected ({gamepads.Count})" : "Launcher - No Controller Detected";
+
+                if (gamepads.Count == 0) return;
+
+                GamepadReading reading = gamepads[0].GetCurrentReading();
+
+                // 1. BUTTON PRESSES (A or X)
+                bool isAPressed = reading.Buttons.HasFlag(GamepadButtons.A);
+                bool isXPressed = reading.Buttons.HasFlag(GamepadButtons.X);
+
+                if ((isAPressed || isXPressed) && !_wasButtonPressed)
+                {
+                    _wasButtonPressed = true;
+                    TriggerGamepadAction();
+                }
+                else if (!isAPressed && !isXPressed)
+                {
+                    _wasButtonPressed = false;
+                }
+
+                // 2. D-PAD & THUMBSTICK NAVIGATION
+                if (DateTime.Now - _lastNavTime < _navCooldown) return;
+
+                bool dpadUp = reading.Buttons.HasFlag(GamepadButtons.DPadUp) || reading.LeftThumbstickY > 0.5;
+                bool dpadDown = reading.Buttons.HasFlag(GamepadButtons.DPadDown) || reading.LeftThumbstickY < -0.5;
+                bool dpadLeft = reading.Buttons.HasFlag(GamepadButtons.DPadLeft) || reading.LeftThumbstickX < -0.5;
+                bool dpadRight = reading.Buttons.HasFlag(GamepadButtons.DPadRight) || reading.LeftThumbstickX > 0.5;
+
+                if (dpadUp || dpadDown || dpadLeft || dpadRight)
+                {
+                    _lastNavTime = DateTime.Now;
+                    HandleGamepadNavigation(dpadUp, dpadDown, dpadLeft, dpadRight);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Prevents WinRT hardware polling errors from crashing the launcher
+                System.Diagnostics.Debug.WriteLine($"Gamepad polling error: {ex.Message}");
+            }
         }
 
+        private void HandleGamepadNavigation(bool up, bool down, bool left, bool right)
+        {
+            // RECOVERY: If focus was lost (e.g. on window background or startup)
+            if (!Options.IsKeyboardFocusWithin && !MenuBox.IsKeyboardFocusWithin)
+            {
+                if (MenuBox.Items.Count > 0)
+                {
+                    MenuBox.SelectedIndex = 0;
+                    FocusContainer(MenuBox, 0);
+                }
+                else if (Options.Items.Count > 0)
+                {
+                    Options.SelectedIndex = 0;
+                    FocusContainer(Options, 0);
+                }
+                return;
+            }
 
+            // CASE 1: Focused on Top Options Row
+            if (Options.IsKeyboardFocusWithin)
+            {
+                if (left && Options.SelectedIndex > 0)
+                {
+                    Options.SelectedIndex--;
+                    FocusContainer(Options, Options.SelectedIndex);
+                }
+                else if (right && Options.SelectedIndex < Options.Items.Count - 1)
+                {
+                    Options.SelectedIndex++;
+                    FocusContainer(Options, Options.SelectedIndex);
+                }
+                else if (down && MenuBox.Items.Count > 0)
+                {
+                    Options.SelectedIndex = -1;
+                    MenuBox.SelectedIndex = 0;
+                    FocusContainer(MenuBox, 0);
+                }
+            }
+            // CASE 2: Focused on Game Cards Row
+            else if (MenuBox.IsKeyboardFocusWithin)
+            {
+                if (left && MenuBox.SelectedIndex > 0)
+                {
+                    MenuBox.SelectedIndex--;
+                    FocusContainer(MenuBox, MenuBox.SelectedIndex);
+                }
+                else if (right && MenuBox.SelectedIndex < MenuBox.Items.Count - 1)
+                {
+                    MenuBox.SelectedIndex++;
+                    FocusContainer(MenuBox, MenuBox.SelectedIndex);
+                }
+                else if (up)
+                {
+                    MenuBox.SelectedIndex = -1;
+                    Options.SelectedIndex = 0;
+                    FocusContainer(Options, 0);
+                }
+            }
+        }
+
+        private void FocusContainer(ListBox listBox, int index)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var container = listBox.ItemContainerGenerator.ContainerFromIndex(index) as ListBoxItem;
+                container?.Focus();
+            }), System.Windows.Threading.DispatcherPriority.Input);
+        }
+        private void TriggerGamepadAction()
+        {
+            // RECOVERY: If focus was lost when button was pressed
+            if (!Options.IsKeyboardFocusWithin && !MenuBox.IsKeyboardFocusWithin)
+            {
+                if (MenuBox.Items.Count > 0)
+                {
+                    MenuBox.SelectedIndex = 0;
+                    FocusContainer(MenuBox, 0);
+                }
+                return;
+            }
+
+            // 1. Top Options Menu
+            if (Options.IsKeyboardFocusWithin)
+            {
+                ExecuteOptionAction();
+            }
+            // 2. Game Cards Row
+            else if (MenuBox.IsKeyboardFocusWithin)
+            {
+                if (MenuBox.SelectedItem is Game selectedGame)
+                {
+                    selectedGame.Launch();
+                }
+            }
+        }
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -268,7 +432,7 @@ namespace Launcher1._0
         // --- UTILITY MENU SELECTION EXECUTION HOOKS ---
         private void Options_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.A || e.Key == Key.X)
+            if (e.Key == Key.Enter || e.Key == Key.Space)
             {
                 ExecuteOptionAction();
                 e.Handled = true;
