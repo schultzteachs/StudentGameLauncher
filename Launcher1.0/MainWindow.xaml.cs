@@ -153,8 +153,7 @@ namespace Launcher1._0
 
             if (dialogResult == true)
             {
-                this.DataContext = null;
-                this.DataContext = this;
+                
                 _database.SaveGames(MasterGameList.ToList());
 
                 MessageBox.Show("Settings Saved!");
@@ -198,7 +197,7 @@ namespace Launcher1._0
         private void RescanButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Rescanning for games!");
-            MasterGameList.Clear();
+            //MasterGameList.Clear();
             _gamescanner.Scan();
             _database.SaveGames(MasterGameList.ToList());
         }
@@ -206,18 +205,20 @@ namespace Launcher1._0
 
         private void OnGameFound(object? sender, GameFoundEvent e)
         {
-            if (!MasterGameList.Any(g => g.Title.Equals(e.GameName, StringComparison.OrdinalIgnoreCase)))
-            {
+            
                 string? exePath = _gamescanner.FindExecutableInFolder(e.GameName);
                 if (exePath != null)
                 {
+                    bool gameExists = MasterGameList.Any(g => g.ExecutablePath.Equals(exePath, StringComparison.OrdinalIgnoreCase));
+                    if (!gameExists)
+                    {
+                        Game newGame = new Game(e.GameName, exePath);
 
-                    Game newGame = new Game(e.GameName, exePath);
-
-                    // Crucial: UI additions must run via the Dispatcher if called from backend threads
-                    Dispatcher.Invoke(() => MasterGameList.Add(newGame));
+                        // Crucial: UI additions must run via the Dispatcher if called from backend threads
+                        Dispatcher.Invoke(() => MasterGameList.Add(newGame));
+                    }
                 }
-            }
+            
         }
 
 
@@ -267,7 +268,7 @@ namespace Launcher1._0
         // --- UTILITY MENU SELECTION EXECUTION HOOKS ---
         private void Options_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Escape)
+            if (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.A || e.Key == Key.X)
             {
                 ExecuteOptionAction();
                 e.Handled = true;
@@ -691,6 +692,7 @@ public class UI
         */
         public void SaveApp(LauncherSettings settings)
         {
+            _laucherSettings = settings;
             var options = new JsonSerializerOptions { WriteIndented = true };
 
             string jsonString = JsonSerializer.Serialize(settings, options);

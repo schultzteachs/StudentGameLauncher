@@ -19,9 +19,11 @@ namespace Launcher1._0
     /// </summary>
     public partial class MetaDataWindow : Window
     {
+        public string? UpdatedGameName { get; set; }
+        public string? UpdatedAuthorName { get; private set; }
         
 
-        
+
 
         public MetaDataWindow(ObservableCollection<Game> games)
         {

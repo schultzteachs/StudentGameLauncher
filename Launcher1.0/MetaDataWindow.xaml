@@ -45,7 +45,7 @@
 
         
             -->
-
+			<Button Content="Save Settings" Margin="0,30,0,0" Height="35" Background="#007ACC" Foreground="White" FontWeight="Bold" Click="SaveButton_Click"/>
         </StackPanel>
 
 
